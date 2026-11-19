@@ -1,0 +1,171 @@
+{
+ "01_edgar_8k": {
+  "notebook": "Notebook 1",
+  "accelerator": null,
+  "code_cells": [
+   "CONFIG",
+   "SETUP",
+   "HTTP",
+   "UNIVERSE",
+   "FILINGS",
+   "PARSE",
+   "DOWNLOAD",
+   "SUMMARY"
+  ]
+ },
+ "02_registry_snapshots": {
+  "notebook": "Notebook 2",
+  "accelerator": null,
+  "code_cells": [
+   "CONFIG",
+   "SETUP",
+   "HTTP",
+   "FIRMS",
+   "CURRENT",
+   "MATCH",
+   "FIND_AACT",
+   "AACT",
+   "SUMMARY"
+  ]
+ },
+ "03_features": {
+  "notebook": "Notebook 3",
+  "accelerator": null,
+  "code_cells": [
+   "CONFIG",
+   "SETUP",
+   "LOAD",
+   "TIMING",
+   "TEXT",
+   "REGISTRY",
+   "DISCLOSE",
+   "READOUTS",
+   "SUMMARY"
+  ]
+ },
+ "03b_stop_disclosure": {
+  "notebook": "Notebook 3b",
+  "accelerator": null,
+  "code_cells": [
+   "CONFIG",
+   "SETUP",
+   "LOAD",
+   "FIRMS",
+   "CHECK_8K",
+   "EDGAR",
+   "COMBINE",
+   "SUMMARY"
+  ]
+ },
+ "04_prices_events": {
+  "notebook": "Notebook 4",
+  "accelerator": null,
+  "code_cells": [
+   "CONFIG",
+   "SETUP",
+   "LOAD",
+   "PRICES",
+   "EVENTS",
+   "OCC",
+   "TESTS"
+  ]
+ },
+ "05_release_text": {
+  "notebook": "Notebook 5",
+  "accelerator": "GPU",
+  "code_cells": [
+   "CONFIG",
+   "SETUP",
+   "TEXTS",
+   "DICT",
+   "LLM",
+   "EMBED",
+   "TESTS"
+  ]
+ },
+ "06_failure_risk": {
+  "notebook": "Notebook 6",
+  "accelerator": null,
+  "code_cells": [
+   "CONFIG",
+   "SETUP",
+   "LOAD",
+   "POS",
+   "FLAGS",
+   "PRICED",
+   "FIGS"
+  ]
+ },
+ "07_disclosure_channels": {
+  "notebook": "Notebook 7",
+  "accelerator": null,
+  "code_cells": [
+   "CONFIG",
+   "SETUP",
+   "LOAD",
+   "DRIFT",
+   "CHANNEL",
+   "TIMING",
+   "CONC",
+   "RECON",
+   "VALID",
+   "FIGS"
+  ]
+ },
+ "08_exits": {
+  "notebook": "Notebook 8",
+  "accelerator": null,
+  "code_cells": [
+   "CONFIG",
+   "SETUP",
+   "LOAD",
+   "EXITS",
+   "OUTCOMES",
+   "BOUNDS",
+   "FIGS"
+  ]
+ },
+ "09_insiders": {
+  "notebook": "Notebook 9",
+  "accelerator": null,
+  "code_cells": [
+   "CONFIG",
+   "SETUP",
+   "LOAD",
+   "INSIDERS",
+   "READOUTS",
+   "FRIDAY",
+   "FIGS"
+  ]
+ },
+ "10_robustness": {
+  "notebook": "Notebook 10",
+  "accelerator": null,
+  "code_cells": [
+   "CONFIG",
+   "SETUP",
+   "SURV",
+   "IMPLIED",
+   "RUNUP",
+   "REGISTRY",
+   "NULLS",
+   "EXITS",
+   "DIAG",
+   "EXTRAS",
+   "SUMMARY",
+   "RUNUP_SPLIT",
+   "BHAR",
+   "INSIDERS2",
+   "FRIDAY_PR",
+   "RELIABLE",
+   "REVIEW",
+   "PAPERFIGS",
+   "ROBUST",
+   "RUNUP20",
+   "GAP30",
+   "CHECKS20",
+   "ROBUST30",
+   "SUMMARY2"
+  ]
+ }
+}

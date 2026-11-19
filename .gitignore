@@ -1,0 +1,16 @@
+# data and outputs live outside the repository
+data/
+features/
+prices/
+edgar/
+ctgov/
+aact/
+*.parquet
+*.npy
+*.zip
+# secrets
+.env
+# python and notebooks
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
