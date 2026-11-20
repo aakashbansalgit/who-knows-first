@@ -203,6 +203,11 @@ class SubmissionsSource:
         if cache_dir:
             os.makedirs(cache_dir, exist_ok=True)
 
+    def close(self):
+        if self.zf is not None:
+            self.zf.close()
+            self.zf, self.names = None, set()
+
     def get(self, name):
         if name in self.names:
             return json.loads(self.zf.read(name))
@@ -367,6 +372,8 @@ else:
     filing_index.to_parquet(FILING_INDEX_PATH, index=False)
     print(f"Filing list saved: {FILING_INDEX_PATH}")
 assert len(filing_index), "No filings found: check SIC_CODES, FORMS and the date window."
+if "source" in globals() and source is not None:
+    source.close()                 # release the bulk zip (Windows keeps open files locked)
 
 n_acc = filing_index["accession"].nunique()
 print(f"{n_acc:,} filings from {filing_index['cik'].nunique():,} firms")

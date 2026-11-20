@@ -65,6 +65,11 @@ PRICE_DIR = os.path.join(PROJECT_DIR, "prices")
 NB10_DIR = os.path.join(FEAT_DIR, "nb10")
 os.makedirs(NB10_DIR, exist_ok=True)
 rng = np.random.default_rng(SEED)
+import zlib
+
+def step_rng(name):
+    """A random stream of its own for each step, so a step's results do not depend on which steps ran before it."""
+    return np.random.default_rng([SEED, zlib.crc32(name.encode())])
 warnings.filterwarnings("ignore")
 RESULTS = []             # one row per headline check, collected for Step 9
 
@@ -264,6 +269,7 @@ print("Saving to:", NB10_DIR)
 
 
 # %% SURV
+rng = step_rng("SURV")
 RO = load("readout_events.parquet", "Notebook 4")
 if RO is not None:
     RO["event_date"] = as_day(RO["event_date"])
@@ -315,6 +321,7 @@ if RO is not None:
 
 
 # %% IMPLIED
+rng = step_rng("IMPLIED")
 if RO is not None:
     T = TA[TA["has_prices"] & TA["outcome"].isin(["success", "failure"]) & TA["car_1_1"].notna()].copy()
     base_q = TA.loc[TA["has_prices"], "car_1_1"]                                  # Notebook 6 clips on all priced topline readouts
@@ -403,6 +410,7 @@ if RO is not None:
 
 
 # %% RUNUP
+rng = step_rng("RUNUP")
 RU = None
 if RO is not None and CAL is not None:
     R3 = TA[TA["has_prices"] & TA["outcome"].isin(["success", "failure", "mixed"])].copy()
@@ -451,8 +459,8 @@ if RO is not None and CAL is not None:
             rows.append(line)
             if k == 10 and lab == "minus placebo":
                 RESULTS.append({"check": "Run-up, successes minus failures, days -10..-2, minus placebo", "estimate": f"{g:+.2%}",
-                                "interval": f"[{lo:+.2%}, {hi:+.2%}]", "p": p, "family": "positive findings",
-                                "reading": "above zero: consistent with leaks; near zero: catalyst buying"})
+                                "interval": f"[{lo:+.2%}, {hi:+.2%}]", "p": p, "family": "",
+                                "reading": "superseded by the 20-placebo run-up of Steps 19 and 19c"})
     RT = pd.DataFrame(rows)
     print("\n=== Run-up before topline readouts (t clustered by firm and date; difference: 95% interval resampling firms) ===")
     print(RT.to_string(index=False, float_format=lambda v: f"{v:.3f}"))
@@ -469,6 +477,7 @@ else:
 
 
 # %% REGISTRY
+rng = step_rng("REGISTRY")
 SE = load("stop_events.parquet", "Notebook 4")
 DSE = load("stop_disclosure_events.parquet", "Notebook 4")
 if SE is not None:
@@ -522,6 +531,7 @@ if DSE is not None:
 
 
 # %% NULLS
+rng = step_rng("NULLS")
 NL = []
 def add(test, est, lo, hi, p, unit, rules):
     NL.append({"test": test, "estimate": est, "lo": lo, "hi": hi, "p": p, "unit": unit, "the interval rules out": rules})
@@ -625,6 +635,7 @@ if NL:
 
 
 # %% EXITS
+rng = step_rng("EXITS")
 EXR = []
 def exit_block(X, gcol, base, other, lab):
     X = X[X[gcol].isin([base, other])].copy()
@@ -712,6 +723,7 @@ if XS is not None:
 
 
 # %% DIAG
+rng = step_rng("DIAG")
 from statsmodels.stats.diagnostic import het_breuschpagan
 from statsmodels.stats.stattools import jarque_bera
 from statsmodels.stats.outliers_influence import variance_inflation_factor, OLSInfluence
@@ -817,6 +829,7 @@ if DG:
 
 
 # %% EXTRAS
+rng = step_rng("EXTRAS")
 HIST_DIR = os.path.join(FEAT_DIR, "nb8", "history")
 if DSE is not None and os.path.isdir(HIST_DIR):
     k8 = DSE[DSE["chan"] == "8-K"].copy()
@@ -888,6 +901,7 @@ if SDF is not None:
 
 
 # %% SUMMARY
+rng = step_rng("SUMMARY")
 SM = pd.DataFrame(RESULTS)
 if len(SM):
     SM["Holm p (within family)"] = np.nan
@@ -913,6 +927,7 @@ print("\nSaved in", NB10_DIR, ":", sorted(os.listdir(NB10_DIR)))
 
 
 # %% RUNUP_SPLIT
+rng = step_rng("RUNUP_SPLIT")
 TX = load("nb5/texts.parquet", "Notebook 5")
 if TX is not None:
     TX = TX.drop_duplicates("accession", keep="last")
@@ -985,6 +1000,7 @@ if RU is not None:
 
 
 # %% BHAR
+rng = step_rng("BHAR")
 _CL = {}
 def px_close(t):
     """Cleaned closes on XBI's calendar (Notebook 4's rules), NaN where the stock did not trade."""
@@ -1071,6 +1087,7 @@ if RO is not None and CAL is not None:
 
 
 # %% INSIDERS2
+rng = step_rng("INSIDERS2")
 IT = load("nb9/insider_trades.parquet", "Notebook 9")
 if IT is not None and E is not None:
     IT["cik"] = pd.to_numeric(IT["cik"], errors="coerce")
@@ -1148,6 +1165,7 @@ else:
 
 
 # %% FRIDAY_PR
+rng = step_rng("FRIDAY_PR")
 if TX is not None and "F" in globals() and len(F):
     MON = (r"(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sept?(?:ember)?|Oct(?:ober)?|"
            r"Nov(?:ember)?|Dec(?:ember)?)")
@@ -1202,6 +1220,7 @@ else:
 
 
 # %% RELIABLE
+rng = step_rng("RELIABLE")
 HITS = load("stop_disclosure_hits.parquet", "Notebook 3b")
 SDF2 = load("stop_disclosure.parquet", "Notebook 3b")
 if HITS is not None and SDF2 is not None:
@@ -1283,6 +1302,7 @@ else:
 
 
 # %% REVIEW
+rng = step_rng("REVIEW")
 import glob
 CTG_DIR = os.path.join(PROJECT_DIR, "ctgov")
 def boot_line(d, stat):
@@ -1502,6 +1522,7 @@ if pick:
 
 
 # %% PAPERFIGS
+rng = step_rng("PAPERFIGS")
 import glob, zipfile
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -1779,7 +1800,7 @@ if "F" in globals() and F is not None and len(F):
     save(fig, "fig_friday.png")
 
 # ---- move size by the language model's expected move ----
-tf = sorted(glob.glob(os.path.join(FEAT_DIR, "nb5", "readout_text_features*.parquet")), key=os.path.getmtime)
+tf = sorted([f for f in glob.glob(os.path.join(FEAT_DIR, "nb5", "readout_text_features*.parquet")) if "_dryrun" not in os.path.basename(f)], key=os.path.getmtime)
 if tf:
     d5 = pd.read_parquet(tf[-1])
     if {"exp_move", "abs_car", "event_date"} <= set(d5.columns):
@@ -1824,6 +1845,7 @@ if MADE:
 
 
 # %% ROBUST
+rng = step_rng("ROBUST")
 import glob, zipfile
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -2005,7 +2027,7 @@ else:
             print(f"  interaction by {lab} did not fit: {e}")
 
     print("\n(f) Readouts where the rule tone and the language model agree")
-    tf = sorted(glob.glob(os.path.join(FEAT_DIR, "nb5", "readout_text_features*.parquet")), key=os.path.getmtime)
+    tf = sorted([f for f in glob.glob(os.path.join(FEAT_DIR, "nb5", "readout_text_features*.parquet")) if "_dryrun" not in os.path.basename(f)], key=os.path.getmtime)
     lf = [f for f in sorted(glob.glob(os.path.join(FEAT_DIR, "nb5", "llm_*_p3*.parquet")), key=os.path.getmtime)
           if "dryrun" not in f and "unmasked" not in f]
     PM = None
@@ -2194,6 +2216,7 @@ except Exception:
 
 
 # %% RUNUP20
+rng = step_rng("RUNUP20")
 import glob, zipfile
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -2381,7 +2404,7 @@ else:
             print(f"  interaction by {lab} did not fit: {e}")
 
     PM = None
-    for f in sorted(glob.glob(os.path.join(FEAT_DIR, "nb5", "readout_text_features*.parquet")), key=os.path.getmtime)[::-1]:
+    for f in sorted([f for f in glob.glob(os.path.join(FEAT_DIR, "nb5", "readout_text_features*.parquet")) if "_dryrun" not in os.path.basename(f)], key=os.path.getmtime)[::-1]:
         x = pd.read_parquet(f)
         if {"accession", "p_met"} <= set(x.columns):
             PM = x[["accession", "p_met"]].drop_duplicates("accession")
@@ -2409,19 +2432,7 @@ else:
             t_ = term(fit("y ~ succ * any_flag", zz), "succ:any_flag")
             print(f"  difference in the gap, warning minus none: {t_['b']:+.2%} [{t_['lo']:+.2%}, {t_['hi']:+.2%}] p = {t_['p']:.2f}")
 
-    # ---- Holm across the four positive findings, with the new run-up p ----
-    if head is not None:
-        others = [x for x in RESULTS if x.get("family") == "positive findings" and not str(x.get("check", "")).startswith("Run-up")
-                  and pd.notna(x.get("p"))]
-        if len(others) == 3:
-            ps = sorted([("run-up", head[3])] + [(x["check"], float(x["p"])) for x in others], key=lambda t: t[1])
-            run, adj = 0.0, {}
-            for i, (k, p_) in enumerate(ps):
-                run = max(run, min(1.0, (4 - i) * p_))
-                adj[k] = run
-            print("\nHolm across the four positive findings: " + " | ".join(f"{k[:40]} {v:.3f}" for k, v in adj.items()))
-        else:
-            print(f"\nHolm: found {len(others)} of the other three positive findings in this session (run Steps 4, 6 and 8 for it)")
+    # (the Holm correction runs once, in Step 19c, with the six-week run-up as the family's run-up)
 
     # ---- 30-day figure with 20 placebo dates ----
     PA = pd.DataFrame(paths).merge(D[["accession", "cik", "outcome", "early"]], on="accession")
@@ -2501,6 +2512,7 @@ else:
 
 
 # %% GAP30
+rng = step_rng("GAP30")
 # ===== Step 19c: the 30-day gap, the share of uncertainty resolved, and Holm (run right after Step 19) =====
 H30 = H.assign(x30=H["xe30"] + H["x10"])
 D30 = D.assign(x30=D["xe30"] + D["x10"])
@@ -2542,11 +2554,15 @@ if os.path.exists(SMp):
             run = max(run, min(1.0, (len(ps) - i) * p_))
             if k == "x":
                 return run
-    for lab, rr in [("days -10..-2", head), ("days -30..-2", r30)]:
-        if rr is not None and len(oth) == 3:
-            print(f"Holm-adjusted p for the run-up, {lab}: {holm_first(rr[3], zip(oth['check'], oth['p'])):.3f}")
+    if r30 is not None and len(oth) == 3:
+        print(f"Holm-adjusted p for the six-week run-up (family of four): {holm_first(r30[3], zip(oth['check'], oth['p'])):.3f}")
 else:
     print("\nNo summary.csv in NB10_DIR yet: run Steps 1 to 9 once for the Holm correction")
+if r30 is not None:
+    RESULTS = [x for x in RESULTS if not str(x.get("check", "")).startswith("Run-up, days -30..-2")]
+    RESULTS.append({"check": "Run-up, days -30..-2, net of 20 placebo dates (headline sample)", "estimate": f"{r30[0]:+.2%}",
+                    "interval": f"[{r30[1]:+.2%}, {r30[2]:+.2%}]", "p": r30[3], "family": "positive findings",
+                    "reading": "the paper's run-up; window chosen after seeing the paths (Step 21 tests the choice)"})
 
 
 # %% [markdown]
@@ -2555,6 +2571,7 @@ else:
 
 
 # %% CHECKS20
+rng = step_rng("CHECKS20")
 # ===== Step 20: Two standard checks on the run-up, fixed before seeing their results =====
 # (1) the outcome read from the market's own reaction, so tone-label errors drop out and mixed and unclear readouts count
 # (2) run-ups scaled by each stock's own volatility (standardized abnormal returns), so a few very volatile stocks carry less weight
@@ -2659,6 +2676,7 @@ else:
 
 
 # %% ROBUST30
+rng = step_rng("ROBUST30")
 # ===== Step 21: the six-week run-up under every robustness check, a selection-adjusted test, the corrected share, sample counts =====
 # Run right after Step 19 in the same session. It redraws Step 19's placebo dates with the same seeds, in the same order.
 if any(k not in globals() for k in ["B", "D", "H", "rpos", "bspan19", "row19", "gap19"]):
@@ -2867,10 +2885,59 @@ else:
 
 
 # %% [markdown]
+# ## Step 22: The placebo design
+# Two choices in the placebo benchmark, checked without changing the headline: (a) a placebo date at least 31 trading days after a readout can still put that readout's days +1 to +20 inside its six-week window, so this check keeps every placebo window clear of readout days 0 to +20; (b) placebo dates can fall after the readout, so this check also draws them only from before it. Run right after Step 21.
+
+
+# %% PLACEBO_DESIGN
+rng = step_rng("PLACEBO_DESIGN")
+R22 = []
+if any(k not in globals() for k in ["B", "rpos", "row19", "R19"]):
+    print("Run Step 19 first, in this session")
+else:
+    def draw22(r, excl, before_only, g):
+        a = px_arrays(r.ticker)
+        if a is None:
+            return None
+        ar, live = a
+        i0 = int(CAL.searchsorted(r.day0))
+        if i0 < 260 or i0 >= len(CAL) - 2:
+            return None
+        top = i0 - excl[0] if before_only else min(i0 + 500, len(CAL) - 30)
+        cand = np.arange(max(i0 - 500, 30), top)
+        ev = rpos.get(r.cik, np.array([]))
+        if len(ev):
+            d = cand[:, None] - ev[None, :]
+            cand = cand[~((d >= -excl[0]) & (d <= excl[1])).any(axis=1)]
+        cand = cand[live[cand]]
+        if len(cand) < 2:
+            return None
+        pk = g.choice(cand, size=min(N_PL20, len(cand)), replace=False)
+        x10 = wsum(ar, i0, -10, -2) - np.nanmean([wsum(ar, int(j), -10, -2) for j in pk])
+        xe = wsum(ar, i0, -30, -11) - np.nanmean([wsum(ar, int(j), -30, -11) for j in pk])
+        return {"accession": r.accession, "p10": x10, "p30": x10 + xe}
+    for lab, excl, before in [("as in the paper (no readout within 30 days)", (30, 30), False),
+                              ("placebo windows clear of readout days 0 to +20", (30, 51), False),
+                              ("placebo dates only before the readout", (30, 30), True),
+                              ("both", (30, 51), True)]:
+        g22 = np.random.default_rng(SEED + 2200)
+        rr = [draw22(r, excl, before, g22) for r in B.itertuples()]
+        X = B.merge(pd.DataFrame([x for x in rr if x]), on="accession", how="inner")
+        X = X[~X["early"]]
+        n0 = len(R19)
+        row19(f"Placebo design, {lab}: days -10..-2", X, "p10")
+        row19(f"Placebo design, {lab}: days -30..-2", X, "p30")
+        R22 += R19[n0:]
+    pd.DataFrame(R22).to_csv(os.path.join(NB10_DIR, "placebo_design.csv"), index=False)
+    print("Saved placebo_design.csv")
+
+
+# %% [markdown]
 # ## Summary, including Steps 10-13
 
 
 # %% SUMMARY2
+rng = step_rng("SUMMARY2")
 SM = pd.DataFrame(RESULTS)
 if len(SM):
     SM["Holm p (within family)"] = np.nan

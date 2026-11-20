@@ -10,7 +10,7 @@ The paper asks what price drift before clinical trial readouts can reveal about 
 pipeline/    the 11 stages, run in order (Python scripts with '# %%' cell markers)
 notebooks/   the same stages as Colab notebooks, generated from pipeline/ by tools/make_notebooks.py
 tests/       offline tests of every stage on synthetic data with planted effects
-tools/       make_notebooks.py, check_paper_numbers.py, cells.py (shared cell reader), stages.json
+tools/       make_notebooks.py, check_paper_numbers.py, score_hand_checks.py, cells.py (shared cell reader), stages.json
 archive/     superseded and exploratory code, not run (see archive/README.md)
 ```
 
@@ -79,16 +79,18 @@ python pipeline/01_edgar_8k.py  # and so on, in the order above
 | Table 10, Friday filings | 09 (Step 4); 10 (Step 13) |
 | Section 9.2, the text of the release | 05 (Step 5) |
 | Table A1, size of the readout move | 04 (Step 5); 10 (Step 7) |
-| Table A2, robustness | 10 (Steps 1 to 21) |
+| Table A2, robustness | 10 (Steps 1 to 22) |
 | Table A3, sample flow | Counts printed by each stage; 10 (Step 21 (a)) for the run-up and insider samples |
 | The run-up (Section 5.2): two-week and six-week gaps, robustness, window-selection test, share before the filing | 10 (Steps 19, 19c, 20 and 21) |
-| Holm corrections | 10 (Steps 9 and 19c) |
+| Holm correction (the six-week run-up and the three other positive findings) | 10 (Step 19c; the final summary writes the family to `summary.csv`) |
+| Placebo-design checks on the run-up | 10 (Step 22) |
+| Error rates from the hand-coded samples (Sections 3.1, 3.3 and 10.1) | `tools/score_hand_checks.py` |
 | Figures 1 and 3 (six-week paths; implied probability) | 10 (Step 19) |
 | Figures 2, 4, 5, 6 and 8 (readout paths, stop reasons, drift after stops, exits, insider sales) | 10 (Step 17) |
 | Figure 7 (exits as competing risks) | 10 (Step 18) |
 | Figure 9 (out-of-sample R-squared of the text measures) | 05 (Step 5); the paper redraws it in the common style |
 
-After a full run, `python tools/check_paper_numbers.py` compares the saved run-up results with the numbers in the paper.
+After a full run, `python tools/check_paper_numbers.py` compares the saved run-up results with the numbers in the paper, and `python tools/score_hand_checks.py` scores the hand-coded validation samples (`features/nb7/validate_readouts.xlsx` and `validate_matches.xlsx`).
 
 ## Random seeds and reproducibility
 
@@ -96,7 +98,7 @@ Every random draw that affects a result is seeded, so running a stage top to bot
 
 | Where | Seed | Used for |
 | --- | --- | --- |
-| `10_robustness`, settings cell | `SEED = 2026` | One shared stream for the bootstraps and for the placebo dates of Steps 3 to 16 |
+| `10_robustness`, every step | `SEED = 2026` and the step's name | Each step draws its bootstraps and placebo dates from its own stream (`step_rng`), so its results do not depend on which steps ran before it |
 | `10_robustness`, Step 18 | `SEED + 1` to `SEED + 5`, `SEED + 20` | Placebo dates for the earlier 5-placebo robustness checks and a first 20-placebo check |
 | `10_robustness`, Steps 19 and 21 | `SEED + 100` to `SEED + 104` | The 20 placebo dates per readout (the paper's run-up), five draws |
 | `10_robustness`, Step 20 | `SEED + 200`, `SEED + 300` | Placebo dates for mixed and unclear readouts; placebo falsification test |
@@ -109,7 +111,7 @@ Every random draw that affects a result is seeded, so running a stage top to bot
 The language model decodes greedily (`do_sample=False`), so its answers do not depend on a seed. Cross-validation uses `GroupKFold`, which is deterministic. The only unseeded randomness is the jitter in retry waits when a download fails, which affects timing only.
 
 Two things can still move a number in its last digit:
-- **Step order in `10_robustness`.** The bootstraps, and the placebo dates of Steps 3 to 16, draw from one shared stream, so they depend on which steps ran before them in the session. The paper's numbers came from sessions that ran the steps in stages, so a single top-to-bottom run can differ in the last reported digit for those steps. The run-up in Section 5.2 uses its own placebo seeds (Steps 19 to 21), so its point estimates do not depend on step order; only its bootstrap intervals and p-values can move.
+- **Bootstrap size.** Intervals and p-values use 1,000 resamples by firm (`N_BOOT`), so a small bootstrap p-value is accurate to about 0.003 and an interval end to a few tenths of a point. Raise `N_BOOT` for more precision.
 - **Data vintage.** The paper uses EDGAR filings through 2025, AACT snapshots from January 2017 to January 2026, and prices downloaded in 2026. Yahoo revises adjusted prices and drops many delisted tickers, so a later download can differ slightly.
 
 ## Tests

@@ -293,7 +293,7 @@ assert g9["Headline: days -10..-2, without releases 2-7 days before the 8-K"] > 
 draws = [v for k, v in g9.items() if k.startswith("draw ")]
 assert len(draws) == 5 and max(draws) - min(draws) < 0.02, draws
 assert abs(g9["Earlier window, days -30..-11, headline sample"]) < 0.06
-for k in ["Holm across the four positive findings", "Tone and language model agree: implied", "runup20_figures.zip"]:
+for k in ["Tone and language model agree: implied", "runup20_figures.zip"]:   # Holm now runs once, in Step 19c
     assert k in out, k
 assert len(zipfile.ZipFile(f"{F}/nb10/runup20_figures.zip").namelist()) == 2
 print("ALL TESTS PASSED")

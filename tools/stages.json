@@ -165,6 +165,7 @@
    "GAP30",
    "CHECKS20",
    "ROBUST30",
+   "PLACEBO_DESIGN",
    "SUMMARY2"
   ]
  }
