@@ -1,6 +1,6 @@
 # Who Knows First? Replication code
 
-Code for **"Who Knows First? Rational Learning, Price Drift and Insider Trading Around Clinical Trial Results"** by Aakash Bansal (working paper, 2026).
+Code for **"Who Knows First? Rational Learning, Price Drift and Insider Trading Around Clinical Trial Results"** by Aakash Bansal (working paper, 2026). The paper itself is [`paper/Who_Knows_First.pdf`](paper/Who_Knows_First.pdf) (November 2026 version).
 
 The paper asks what price drift before clinical trial readouts can reveal about insider trading. It measures the drift in 1,359 topline readouts announced on Form 8-K by US-listed biotech firms from 2010 to 2025. It then tests the channels the disclosure and insider-trading rules monitor: Form 4 trades, options volume, the timing of filings, and the ClinicalTrials.gov registry, using a separate sample of 1,083 trial stops. The pipeline here builds every dataset from public sources and produces the paper's tables, figures and reported numbers.
 
